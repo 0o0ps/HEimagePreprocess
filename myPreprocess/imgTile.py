@@ -242,6 +242,7 @@ def nested_patches(img_slide, out_base, level=(0,), ext='jpeg'):
 if __name__ == '__main__':
     Image.MAX_IMAGE_PIXELS = None
     parser = argparse.ArgumentParser(description='Patch extraction for WSI')
+    parser.add_argument('-p', '--ori_path', type=str, default='./', help='Path to original files')
     parser.add_argument('-d', '--dataset', type=str, default='TCGA-lung', help='Dataset name')
     parser.add_argument('-e', '--overlap', type=int, default=0, help='Overlap of adjacent tiles [0]')
     parser.add_argument('-f', '--format', type=str, default='jpeg', help='Image format for tiles [jpeg]')
@@ -259,12 +260,25 @@ if __name__ == '__main__':
     args = parser.parse_args()
     levels = tuple(sorted(args.magnifications))
     assert len(levels)<=2, 'Only 1 or 2 magnifications are supported!'
-    path_base = os.path.join('WSI', args.dataset)
+    # path_base = os.path.join('WSI', args.dataset)
+    path_base = args.ori_path
+    
     if len(levels) == 2:
         out_base = os.path.join('WSI', args.dataset, 'pyramid')
     else:
         out_base = os.path.join('WSI', args.dataset, 'single')
-    all_slides = glob.glob(os.path.join(path_base, '*/*.'+args.slide_format)) +  glob.glob(os.path.join(path_base, '*/*/*.'+args.slide_format))
+        
+    
+    ###! all_slides = glob.glob(os.path.join(path_base, '*/*.'+args.slide_format)) +  glob.glob(os.path.join(path_base, '*/*/*.'+args.slide_format))
+    # all_slides = glob.glob(os.path.join(path_base, '*/*.'+ "svs")) +  glob.glob(os.path.join(path_base, '*/*/*.'+ "svs"))
+    all_slides = glob.glob(os.path.join(path_base, '*.' +args.slide_format))
+    
+    
+    print(path_base)
+    print(all_slides)
+    
+    
+    
     
     # pos-i_pos-j -> x, y
     for idx, c_slide in enumerate(all_slides):
@@ -276,7 +290,7 @@ if __name__ == '__main__':
     
     
     
-    # python deepzoom_tiler.py -m 0 -b 20
+    # python deepzoom_tiler.py -m 0 -b 20 -d testData
     ## For training
     # nohup python /mnt/data/lyx/IMC/WSI_HE/HE_classification_2/deepzoom_tiler.py -m 0 -b 20 -v ndpi -p /mnt/data/lyx/IMC/WSI_HE/WSI_Trainging/test -f tif -c 8 &
     # nohup python -u deepzoom_tiler.py -m 0 -b 20 > nohup_deepzoom_tiler.txt 2>&1 &
